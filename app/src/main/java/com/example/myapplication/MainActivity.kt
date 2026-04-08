@@ -1,5 +1,5 @@
 package com.example.myapplication
-
+import android.widget.TextView
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -11,6 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+private lateinit var counterViewModel: CounterViewModel
+private lateinit var tvCounter: TextView
+private lateinit var btnIncrement: Button
+private lateinit var btnDecrement: Button
+private lateinit var btnReset: Button
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,7 +36,22 @@ class MainActivity : AppCompatActivity() {
         fabAdd = findViewById(R.id.fabAdd)
         btnAddUser = findViewById(R.id.btnAddUser)
         etUserName = findViewById(R.id.etUserName)
+// Инициализация счетчика
+        counterViewModel = ViewModelProvider(this).get(CounterViewModel::class.java)
+        tvCounter = findViewById(R.id.tvCounter)
+        btnIncrement = findViewById(R.id.btnIncrement)
+        btnDecrement = findViewById(R.id.btnDecrement)
+        btnReset = findViewById(R.id.btnReset)
 
+// Подписка на LiveData счетчика
+        counterViewModel.count.observe(this) { count ->
+            tvCounter.text = count.toString()
+        }
+
+// Обработчики кнопок
+        btnIncrement.setOnClickListener { counterViewModel.increment() }
+        btnDecrement.setOnClickListener { counterViewModel.decrement() }
+        btnReset.setOnClickListener { counterViewModel.reset() }
         // Получение ViewModel
         viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
