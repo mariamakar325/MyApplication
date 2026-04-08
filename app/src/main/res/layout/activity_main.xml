@@ -16,22 +16,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/btnOpenDetail"
+        <!-- Поле ввода -->
+        <EditText
+            android:id="@+id/etUserName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Открыть второй экран"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- SearchView для поиска -->
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:queryHint="Поиск..."
-            android:iconifiedByDefault="false"
+            android:hint="Введите имя"
             android:layout_marginBottom="8dp"/>
 
+        <!-- Кнопка добавления -->
+        <Button
+            android:id="@+id/btnAddUser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Добавить"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Список -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
@@ -39,6 +40,7 @@
             android:layout_weight="1"/>
     </LinearLayout>
 
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"

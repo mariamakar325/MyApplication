@@ -1,95 +1,99 @@
 package com.example.myapplication
 
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ExpandableAdapter
-    private lateinit var btnOpenDetail: Button
+    private lateinit var adapter: UserAdapter
     private lateinit var fabAdd: FloatingActionButton
+    private lateinit var btnAddUser: Button
+    private lateinit var etUserName: EditText
 
-    // Список категорий с подэлементами
-    private val categories = mutableListOf(
-        CategoryItem(
-            categoryName = "Пользователи",
-            categoryImage = android.R.drawable.ic_menu_myplaces,
-            subItems = listOf("Анна", "Борис", "Виктор"),
-            isExpanded = false
-        ),
-        CategoryItem(
-            categoryName = "Администраторы",
-            categoryImage = android.R.drawable.ic_menu_manage,
-            subItems = listOf("Галина", "Дмитрий"),
-            isExpanded = false
-        ),
-        CategoryItem(
-            categoryName = "Гости",
-            categoryImage = android.R.drawable.ic_menu_gallery,
-            subItems = listOf("Елена", "Жанна", "Игорь", "Константин"),
-            isExpanded = false
-        ),
-        CategoryItem(
-            categoryName = "Модераторы",
-            categoryImage = android.R.drawable.ic_menu_edit,
-            subItems = listOf("Людмила", "Михаил"),
-            isExpanded = false
-        )
-    )
+    private lateinit var viewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Инициализация элементов
         recyclerView = findViewById(R.id.recyclerView)
-        btnOpenDetail = findViewById(R.id.btnOpenDetail)
         fabAdd = findViewById(R.id.fabAdd)
+        btnAddUser = findViewById(R.id.btnAddUser)
+        etUserName = findViewById(R.id.etUserName)
 
-        //ExpandableAdapte
+        // Получение ViewModel
+        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
+        // Настройка RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = ExpandableAdapter(categories)
+        adapter = UserAdapter { userName ->
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra("USER_NAME", userName)
+            startActivity(intent)
+        }
         recyclerView.adapter = adapter
 
-
-        setupRecyclerViewDivider()
-
-        btnOpenDetail.setOnClickListener {
-            startActivity(Intent(this, DetailActivity::class.java))
+        // Подписка на LiveData
+        viewModel.userList.observe(this) { list ->
+            adapter.updateList(list)
         }
 
+        // FAB - быстрое добавление
         fabAdd.setOnClickListener {
-            // Добавление новой категории
-            val newCategory = CategoryItem(
-                categoryName = "Новая категория ${categories.size + 1}",
-                categoryImage = android.R.drawable.ic_menu_add,
-                subItems = listOf("Подэлемент 1", "Подэлемент 2"),
-                isExpanded = false
-            )
-            categories.add(newCategory)
-            adapter.notifyItemInserted(categories.size - 1)
+            val userName = "Пользователь ${viewModel.getListSize() + 1}"
+            viewModel.addUser(userName)
         }
+
+        // Кнопка добавления с полем ввода
+        btnAddUser.setOnClickListener {
+            val userName = etUserName.text.toString().trim()
+
+            if (userName.isNotEmpty()) {
+                viewModel.addUser(userName)
+                etUserName.text.clear()
+            } else {
+                Snackbar.make(recyclerView, "Введите имя!", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        // Удаление свайпом
+        setupSwipeToDelete()
     }
 
-    private fun setupRecyclerViewDivider() {
-        val dividerItemDecoration = DividerItemDecoration(
-            this,
-            LinearLayoutManager.VERTICAL
-        )
+    private fun setupSwipeToDelete() {
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
 
-        val dividerDrawable = ColorDrawable(Color.parseColor("#DDDDDD")).apply {
-            setBounds(0, 0, 1, 2)
-        }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                viewModel.deleteUser(position)
 
-        dividerItemDecoration.setDrawable(dividerDrawable)
-        recyclerView.addItemDecoration(dividerItemDecoration)
+                Snackbar.make(recyclerView, "Удалено", Snackbar.LENGTH_LONG)
+                    .setAction("Отмена") { }
+                    .show()
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 }
