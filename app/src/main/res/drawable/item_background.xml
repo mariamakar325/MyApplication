@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- элемент нажат -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#E0E0E0"/>  <!-- Серый цвет при нажатии -->
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- элемент выбран  -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#B0BEC5"/>  <!-- Светло-синий при выборе -->
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- обычное  -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF"/>  <!-- Белый цвет в обычном состоянии -->
+            <corners android:radius="8dp"/>
+            <stroke android:width="1dp" android:color="#DDDDDD"/>
+        </shape>
+    </item>
+
+</selector>
